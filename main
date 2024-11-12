@@ -1,0 +1,113 @@
+game.StarterGui:SetCore("SendNotification", {
+    Title = "System Commands",
+    Text = "say /c system to get started!",
+    Duration = 5
+})
+    local Players = game:GetService("Players")
+    local systemMode = {}
+
+    local function checkSystemMode(player)
+        return systemMode[player.UserId] == true
+    end
+
+    Players.PlayerChatted:Connect(function(player, message)
+        if message:lower() == "/c system" then
+            systemMode[player.UserId] = true
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "System Mode",
+                Text = "Type ?cmds to view commands!",
+                Duration = 5
+            })
+        elseif message:lower() == "?cmds" and checkSystemMode(player) then
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "System Commands", 
+                Text = "Commands: \n/tp [player]\n/god\n/ungod\n/ff\n/unff\n/speed [num]\n/jump [num]\n/fly\n/unfly\n/noclip\n/clip\n/sit\n/reset\n/goto [player]",
+                Duration = 20,
+                Button1 = "Close"
+            })
+        elseif checkSystemMode(player) then
+            local cmd = message:lower():split(" ")
+            if cmd[1] == "/tp" and cmd[2] then
+                local target = Players:FindFirstChild(cmd[2])
+                if target and target.Character and player.Character then
+                    player.Character:MoveTo(target.Character.PrimaryPart.Position)
+                end
+            elseif cmd[1] == "/god" then
+                if player.Character then
+                    local humanoid = player.Character:FindFirstChild("Humanoid")
+                    if humanoid then
+                        humanoid.MaxHealth = math.huge
+                        humanoid.Health = math.huge
+                    end
+                end
+            elseif cmd[1] == "/ungod" then
+                if player.Character then
+                    local humanoid = player.Character:FindFirstChild("Humanoid")
+                    if humanoid then
+                        humanoid.MaxHealth = 100
+                        humanoid.Health = 100
+                    end
+                end
+            elseif cmd[1] == "/ff" then
+                if player.Character then
+                    local ff = Instance.new("ForceField")
+                    ff.Parent = player.Character
+                end
+            elseif cmd[1] == "/unff" then
+                if player.Character then
+                    local ff = player.Character:FindFirstChild("ForceField")
+                    if ff then ff:Destroy() end
+                end
+            elseif cmd[1] == "/speed" and cmd[2] then
+                if player.Character and player.Character:FindFirstChild("Humanoid") then
+                    player.Character.Humanoid.WalkSpeed = tonumber(cmd[2])
+                end
+            elseif cmd[1] == "/jump" and cmd[2] then
+                if player.Character and player.Character:FindFirstChild("Humanoid") then
+                    player.Character.Humanoid.JumpPower = tonumber(cmd[2])
+                end
+            elseif cmd[1] == "/fly" then
+                if player.Character then
+                    local bp = Instance.new("BodyPosition")
+                    bp.Name = "FlyPart"
+                    bp.Parent = player.Character.HumanoidRootPart
+                    bp.MaxForce = Vector3.new(math.huge,math.huge,math.huge)
+                    bp.Position = player.Character.HumanoidRootPart.Position
+                end
+            elseif cmd[1] == "/unfly" then
+                if player.Character then
+                    local bp = player.Character.HumanoidRootPart:FindFirstChild("FlyPart")
+                    if bp then bp:Destroy() end
+                end
+            elseif cmd[1] == "/noclip" then
+                if player.Character then
+                    for _, part in pairs(player.Character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = false
+                        end
+                    end
+                end
+            elseif cmd[1] == "/clip" then
+                if player.Character then
+                    for _, part in pairs(player.Character:GetDescendants()) do
+                        if part:IsA("BasePart") then
+                            part.CanCollide = true
+                        end
+                    end
+                end
+            elseif cmd[1] == "/sit" then
+                if player.Character and player.Character:FindFirstChild("Humanoid") then
+                    player.Character.Humanoid.Sit = true
+                end
+            elseif cmd[1] == "/reset" then
+                if player.Character then
+                    player.Character:BreakJoints()
+                end
+            elseif cmd[1] == "/goto" and cmd[2] then
+                local target = Players:FindFirstChild(cmd[2])
+                if target and target.Character and player.Character then
+                    player.Character:MoveTo(target.Character.PrimaryPart.Position)
+                end
+            end
+        end
+    end)
